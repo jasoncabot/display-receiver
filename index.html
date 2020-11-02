@@ -37,22 +37,20 @@
         window.onload = function () {
             window.castReceiverManager = cast.framework.CastReceiverContext.getInstance();
 
-            castReceiverManager.onReady = function (event) {
+            castReceiverManager.onReady = (event) => {
                 window.castReceiverManager.setApplicationState('ShareCast ready...');
             };
 
             // messages on a custom namespace
-            var ns = 'urn:x-cast:com.url.cast';
-            window.messageBus = window.castReceiverManager.getCastMessageBus(ns);
+            let ns = 'urn:x-cast:com.jasoncabot.sharecast';
+            window.castReceiverManager.addCustomMessageListener(ns, (event) => {
+                var msg = JSON.parse(event.data);
 
-            window.messageBus.onMessage = function (e) {
-                var msg = JSON.parse(e.data);
-
-                window.messageBus.send(e.senderId, 'ok');
+                window.castReceiverManager.sendCustomMessage(ns, event.senderId, 'ok');
 
                 if (msg.type === 'iframe') updateFrame(msg.url);
                 if (msg.type === 'loc') updateLocation(msg.url);
-            };
+            });
 
             // initialize CastReceiverManager
             window.castReceiverManager.start({ statusText: 'ShareCast starting...' });
